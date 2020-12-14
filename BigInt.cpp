@@ -26,16 +26,16 @@
  * 
  * There are two static constants defined in this file: 
  * 
- * - ULongMax		: ULONG_MAX (defined in climits) of type BigInt
+ * - ULongMax		: ULLONG_MAX (defined in climits) of type BigInt
  * 		Mainly used for speedup in the multiply() private member function. 
- * 		Represents the largest unsigned long integer a particular platform can
+ * 		Represents the largest unsigned long long integer a particular platform can
  * 		handle. If a BigInt is <= ULongMax, it can be converted to unsigned
  * 		long int. This is platform-specific. 
- * 	- SqrtUlongMax	: sqrt(ULONG_MAX) of type BigInt
+ * 	- SqrtUlongMax	: sqrt(ULLONG_MAX) of type BigInt
  * 		Mainly used for speedup in the multiply() private member function. 
- * 		Represents the square root of the largest unsigned long integer a 
+ * 		Represents the square root of the largest unsigned long long integer a 
  * 		particular platform can	handle. If two BigInts are <= SqrtULongMax, 
- * 		they can be converted to unsigned long int and safely multiplied 
+ * 		they can be converted to unsigned long long int and safely multiplied 
  * 		by the CPU. This is platform-specific. 
  * 
  * ****************************************************************************
@@ -46,7 +46,7 @@
 
 #include "BigInt.h"
 #include <cstring>	 //strlen()
-#include <climits>	 //ULONG_MAX
+#include <climits>	 //ULLONG_MAX
 #include <vector>	 //vector<bool>
 #include <string>	 //operator std::string()
 #include <algorithm> //reverse_copy(), copy(), copy_backward(),
@@ -58,16 +58,16 @@ using std::endl;
 //define and initialize BigInt::FACTOR
 const double BigInt::FACTOR = 1.6;
 
-//A BigInt number with the value of ULONG_MAX
-static const BigInt ULongMax(ULONG_MAX);
-//A BigInt number with the value of sqrt(ULONG_MAX)
-static const BigInt SqrtULongMax(static_cast<unsigned long int>(sqrt(static_cast<double>(ULONG_MAX))));
+//A BigInt number with the value of ULLONG_MAX
+static const BigInt ULongMax(ULLONG_MAX);
+//A BigInt number with the value of sqrt(ULLONG_MAX)
+static const BigInt SqrtULongMax(static_cast<unsigned long long int>(sqrt(static_cast<double>(ULLONG_MAX))));
 
-/* Transforms the number from unsigned long int to unsigned char[]
+/* Transforms the number from unsigned long long int to unsigned char[]
  * and pads the result with zeroes. Returns the number of digits. */
-unsigned long int BigInt::int2uchar(unsigned long int number,
-									unsigned char *digits,
-									unsigned long int padding = 0L)
+unsigned long long int BigInt::int2uchar(unsigned long long int number,
+										 unsigned char *digits,
+										 unsigned long long int padding = 0L)
 {
 	int i(0);
 	do
@@ -84,17 +84,17 @@ unsigned long int BigInt::int2uchar(unsigned long int number,
 
 /* Converts ASCII digits to equivalent unsigned char numeric values. */
 void BigInt::char2uchar(unsigned char *array,
-						unsigned long int length)
+						unsigned long long int length)
 {
-	for (unsigned long int i(0L); i < length; i++)
+	for (unsigned long long int i(0L); i < length; i++)
 		array[i] -= '0';
 }
 
 /* Check if all ASCII values are digits '0' to '9'. */
 bool BigInt::allCharsAreDigits(const char *array,
-							   unsigned long int length)
+							   unsigned long long int length)
 {
-	for (unsigned long int i(0L); i < length; i++)
+	for (unsigned long long int i(0L); i < length; i++)
 		if (array[i] < '0' || array[i] > '9')
 			return false;
 
@@ -104,8 +104,8 @@ bool BigInt::allCharsAreDigits(const char *array,
 /* Compares two BigInt. If the last two arguments are 
  * omitted, the comparison is sign-insensitive (comparison by 
  * absolute value). Returns 0 if a == b, 1 if a > b, 2 if a < b. */
-int BigInt::compareNumbers(unsigned char *a, unsigned long int na,
-						   unsigned char *b, unsigned long int nb,
+int BigInt::compareNumbers(unsigned char *a, unsigned long long int na,
+						   unsigned char *b, unsigned long long int nb,
 						   bool aPositive, bool bPositive)
 {
 	if ((na < nb) || (!aPositive && bPositive))
@@ -139,7 +139,7 @@ int BigInt::compareNumbers(unsigned char *a, unsigned long int na,
 /* Multiplies two unsigned char[] using the Divide and Conquer 
  * a.k.a. Karatsuba algorithm .*/
 void BigInt::karatsubaMultiply(unsigned char *a, unsigned char *b,
-							   unsigned long int n, unsigned char *buf1)
+							   unsigned long long int n, unsigned char *buf1)
 {
 	//if *a <= SqrtULongMax && *b <= SqrtULongMax,
 	//the CPU can do the multiplication
@@ -153,7 +153,7 @@ void BigInt::karatsubaMultiply(unsigned char *a, unsigned char *b,
 	//nh = higher half digits, nl = lower half digits
 	//nh == nl || nh + 1 == nl
 	//nt is used to avoid too much nl + 1 addition operations
-	unsigned long int nh(n >> 1), nl(n - nh), nt(nl + 1);
+	unsigned long long int nh(n >> 1), nl(n - nh), nt(nl + 1);
 	//t1 is a temporary pointer, points to p1
 	unsigned char *t1(buf1 + (n << 1));
 
@@ -164,7 +164,7 @@ void BigInt::karatsubaMultiply(unsigned char *a, unsigned char *b,
 	BigInt::karatsubaMultiply(buf1, buf1 + nt, nt, t1 + (n << 1)); //p3
 
 	//for leftshifting p3 and p1
-	unsigned long int power(n);
+	unsigned long long int power(n);
 	if (power & 1)
 		power++;
 	//since the original multiplier is not needed any more, we can reuse a
@@ -191,7 +191,7 @@ void BigInt::karatsubaMultiply(unsigned char *a, unsigned char *b,
 	//a = p3, b = p2
 	unsigned char carry = BigInt::quickAdd(buf1, t1 + (nh << 1), nl);
 	a = buf1 + (nl << 1);
-	for (unsigned long int i(0L); carry; i++)
+	for (unsigned long long int i(0L); carry; i++)
 	{
 		a[i] += 1;
 		carry = a[i] / 10;
@@ -200,17 +200,17 @@ void BigInt::karatsubaMultiply(unsigned char *a, unsigned char *b,
 }
 
 /* Multiplies two unsigned char[] the long way. */
-void BigInt::longMultiply(unsigned char *a, unsigned long int na,
-						  unsigned char *b, unsigned long int nb,
+void BigInt::longMultiply(unsigned char *a, unsigned long long int na,
+						  unsigned char *b, unsigned long long int nb,
 						  unsigned char *result)
 {
 	std::fill_n(result, na + nb, 0);
 	unsigned char mult(0);
 	int carry(0);
 
-	for (unsigned long int i(0L); i < na; i++)
+	for (unsigned long long int i(0L); i < na; i++)
 	{
-		for (unsigned long int j(0L); j < nb; j++)
+		for (unsigned long long int j(0L); j < nb; j++)
 		{
 			mult = a[i] * b[j] + result[i + j] + carry;
 			result[i + j] = static_cast<int>(mult) % 10;
@@ -227,10 +227,10 @@ void BigInt::longMultiply(unsigned char *a, unsigned long int na,
 /* Simple addition, used by the multiply function.
  * Returns the remaining carry. */
 unsigned char BigInt::quickAdd(unsigned char *a, unsigned char *b,
-							   unsigned long int n)
+							   unsigned long long int n)
 {
 	unsigned char carry(0), sum(0);
-	for (unsigned long int i(0L); i < (n << 1); i++)
+	for (unsigned long long int i(0L); i < (n << 1); i++)
 	{
 		sum = a[i] + b[i] + carry;
 		carry = sum / 10;
@@ -241,10 +241,10 @@ unsigned char BigInt::quickAdd(unsigned char *a, unsigned char *b,
 
 /* Simple subtraction, used by the multiply function. */
 void BigInt::quickSub(unsigned char *a, unsigned char *b,
-					  unsigned char *end, unsigned long int n)
+					  unsigned char *end, unsigned long long int n)
 {
 	unsigned char carry(0), sum(0);
-	for (unsigned long int i(0L); i < (n << 1); i++)
+	for (unsigned long long int i(0L); i < (n << 1); i++)
 	{
 		sum = 10 + a[i] - (b[i] + carry);
 		if (sum < 10) //carry
@@ -286,22 +286,22 @@ void BigInt::divide(const BigInt &dividend, const BigInt &divisor,
 								  divisor.digits, divisor.digitCount,
 								  true, true) != 2)
 	{
-		unsigned long int O(X.digitCount - divisor.digitCount);
+		unsigned long long int O(X.digitCount - divisor.digitCount);
 		if (O <= ULongMax.digitCount - 2)
 		{
-			unsigned long int i;
+			unsigned long long int i;
 			if (X.digitCount > ULongMax.digitCount - 1)
 				i = ULongMax.digitCount - 1;
 			else
 				i = X.digitCount;
-			unsigned long int j(i - O);
+			unsigned long long int j(i - O);
 			Z1 = toInt(X.digits + X.digitCount - i, i) /
 				 toInt(divisor.digits + divisor.digitCount - j, j);
 		}
 		else
 		{
-			unsigned long int i(ULongMax.digitCount - 1);
-			unsigned long int j;
+			unsigned long long int i(ULongMax.digitCount - 1);
+			unsigned long long int j;
 			if (divisor.digitCount > ULongMax.digitCount - 2)
 				j = ULongMax.digitCount - 2;
 			else
@@ -333,10 +333,10 @@ void BigInt::divide(const BigInt &dividend, const BigInt &divisor,
 }
 
 /* Returns the value of the specified unsigned char[] as long int. */
-unsigned long int BigInt::toInt(unsigned char *digits, int n)
+unsigned long long int BigInt::toInt(unsigned char *digits, int n)
 {
-	unsigned long int newInt(0L);
-	unsigned long int powerOf10(1);
+	unsigned long long int newInt(0L);
+	unsigned long long int powerOf10(1);
 	for (int i(0); i < n; i++)
 	{
 		newInt += digits[i] * powerOf10;
@@ -350,8 +350,8 @@ unsigned long int BigInt::toInt(unsigned char *digits, int n)
  * remaining free places with zeroes (used in KaratsubaMultiply()). 
  * Returns true if there was an overflow at the end (meaning that
  * the result.digitCount was longer.digitCount + 1. */
-bool BigInt::add(unsigned char *shorter, unsigned long int nShorter,
-				 unsigned char *longer, unsigned long int nLonger,
+bool BigInt::add(unsigned char *shorter, unsigned long long int nShorter,
+				 unsigned char *longer, unsigned long long int nLonger,
 				 unsigned char *result, int nResult, bool doFill)
 {
 	//single digitwise sum and carry
@@ -359,7 +359,7 @@ bool BigInt::add(unsigned char *shorter, unsigned long int nShorter,
 	unsigned char subCarry(0);
 
 	//count the digits
-	unsigned long int i(0L);
+	unsigned long long int i(0L);
 
 	//add the digits
 	for (; i < nShorter; i++)
@@ -388,7 +388,7 @@ bool BigInt::add(unsigned char *shorter, unsigned long int nShorter,
 }
 
 /* Shifts the digits n places left. */
-BigInt &BigInt::shiftLeft(unsigned long int n)
+BigInt &BigInt::shiftLeft(unsigned long long int n)
 {
 	//if the number is 0, we won't shift it
 	if (EqualsZero())
@@ -403,7 +403,7 @@ BigInt &BigInt::shiftLeft(unsigned long int n)
 }
 
 /* Shifts the digits n places right. */
-BigInt &BigInt::shiftRight(unsigned long int n)
+BigInt &BigInt::shiftRight(unsigned long long int n)
 {
 	if (n >= digitCount)
 		throw "Error BIGINT00: Overflow on shift right.";
@@ -415,9 +415,9 @@ BigInt &BigInt::shiftRight(unsigned long int n)
 }
 
 /* Expands the digits* to n. */
-void BigInt::expandTo(unsigned long int n)
+void BigInt::expandTo(unsigned long long int n)
 {
-	unsigned long int oldLength(length);
+	unsigned long long int oldLength(length);
 	length = n;
 	unsigned char *oldDigits(digits);
 	try
@@ -454,7 +454,7 @@ BigInt::BigInt() : digits(0), length(10), digitCount(1), positive(true)
 
 BigInt::BigInt(const char *charNum) : digits(0)
 {
-	digitCount = (unsigned long int)strlen(charNum);
+	digitCount = (unsigned long long int)strlen(charNum);
 
 	if (digitCount == 0L)
 		throw "Error BIGINT03: Input string empty.";
@@ -497,7 +497,7 @@ BigInt::BigInt(const char *charNum) : digits(0)
 		positive = true;
 	}
 
-	length = (unsigned long int)(digitCount * BigInt::FACTOR + 1);
+	length = (unsigned long long int)(digitCount * BigInt::FACTOR + 1);
 
 	try
 	{
@@ -515,7 +515,7 @@ BigInt::BigInt(const char *charNum) : digits(0)
 	BigInt::char2uchar(digits, digitCount);
 }
 
-BigInt::BigInt(unsigned long int intNum) : digits(0)
+BigInt::BigInt(unsigned long long int intNum) : digits(0)
 {
 	positive = true;
 
@@ -525,7 +525,7 @@ BigInt::BigInt(unsigned long int intNum) : digits(0)
 	unsigned char tempDigits[40] = {0};
 
 	digitCount = int2uchar(intNum, tempDigits);
-	length = (unsigned long int)(digitCount * BigInt::FACTOR + 1);
+	length = (unsigned long long int)(digitCount * BigInt::FACTOR + 1);
 
 	try
 	{
@@ -564,7 +564,7 @@ BigInt::BigInt(const BigInt &rightNumber) : length(rightNumber.length),
 {
 	//make sure we have just enough space
 	if (length <= digitCount + 2 || length > (digitCount << 2))
-		length = (unsigned long int)(digitCount * BigInt::FACTOR + 1);
+		length = (unsigned long long int)(digitCount * BigInt::FACTOR + 1);
 	try
 	{
 		digits = new unsigned char[length];
@@ -590,7 +590,7 @@ BigInt &BigInt::operator=(const BigInt &rightNumber)
 	if (length < rightNumber.digitCount + 2 ||
 		length > (rightNumber.digitCount << 2))
 	{
-		length = (unsigned long int)(rightNumber.digitCount * BigInt::FACTOR + 1);
+		length = (unsigned long long int)(rightNumber.digitCount * BigInt::FACTOR + 1);
 		//keep a pointer to the current digits, in case
 		//there is not enough memory to allocate for the new digits
 		unsigned char *tempDigits(digits);
@@ -916,7 +916,7 @@ BigInt operator*(const BigInt &a, const BigInt &b)
 		bigIntResult.positive = false;
 	bigIntResult.expandTo(n + 10);
 	std::copy(bc, bc + n, bigIntResult.digits);
-	for (unsigned long int i = n - 1; i > 0L; i--)
+	for (unsigned long long int i = n - 1; i > 0L; i--)
 	{
 		if (bigIntResult.digits[i])
 		{
@@ -1003,7 +1003,7 @@ BigInt &BigInt::operator%=(const BigInt &number)
 
 /* Returns *this to the power of n 
  * using the fast Square and Multiply algorithm. */
-BigInt BigInt::GetPower(unsigned long int n) const
+BigInt BigInt::GetPower(unsigned long long int n) const
 {
 	BigInt result(BigIntOne);
 	BigInt base(*this);
@@ -1027,7 +1027,7 @@ BigInt BigInt::GetPower(unsigned long int n) const
 }
 
 /* *this = *this to the power of n. */
-void BigInt::SetPower(unsigned long int n)
+void BigInt::SetPower(unsigned long long int n)
 {
 	*this = (*this).GetPower(n);
 }
@@ -1109,7 +1109,7 @@ void BigInt::SetPowerMod(const BigInt &b, const BigInt &n)
 }
 
 /* Returns the nth digit read-only, zero-based, right-to-left. */
-unsigned char BigInt::GetDigit(unsigned long int index) const
+unsigned char BigInt::GetDigit(unsigned long long int index) const
 {
 	if (index >= digitCount)
 		throw "Error BIGINT15: Index out of range.";
@@ -1118,7 +1118,7 @@ unsigned char BigInt::GetDigit(unsigned long int index) const
 }
 
 /* Returns the nth digit, zero-based, right-to-left. */
-void BigInt::SetDigit(unsigned long int index, unsigned char value)
+void BigInt::SetDigit(unsigned long long int index, unsigned char value)
 {
 	if (index >= digitCount)
 		throw "Error BIGINT15: Index out of range.";

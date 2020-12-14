@@ -1,5 +1,8 @@
 # Ignore Visual Studio Code configuration folder
-.vscode/
+#.vscode/
 # Ignore compiled object files and executables
 *.o
 *.exe
+#*.bin
+#*.txt
+drmemory/
