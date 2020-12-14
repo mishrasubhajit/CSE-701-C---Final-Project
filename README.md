@@ -2,7 +2,7 @@
 
 1. This is a basic RSA encryption algorithm written for the purpose of CSE 701 project. This is by no means a program that can be commercially used.
 
-2. The BigInt class I have used is taken from [here](https://github.com/srndic/rsa/blob/master/source/BigInt.cpp). A few changes were to made to accomodate my program and a few wrrors were resolved.
+2. The BigInt class I have used is taken from [here](https://github.com/srndic/rsa/blob/master/source/BigInt.cpp). A few changes were to made to accomodate my program and a few errors were resolved.
 
 3. This is my first time programming. It is evident that the program is not sophisticated.
 
@@ -18,4 +18,8 @@
 
 9. The vector overload header file is the header file from the class, written by our Prof Barak Shoshany.
 
-10. I confess, the program can't be considered as a good program at all. But I hope to build on my first programming course and first programming project, and improve in the future.
+10. One other problem: I had to use to sizeof(uint8_t) while reading the file instead of bigger chunks. This is because the later one didn't gave the expected result. With larger chunks, the binary files were not even getting copied correctly. I belive this has something to do with the representation of BigInt.
+
+11. I don't know hwhat more should I explain but I really tried to make encryption and decryption separately but it just didn't work.
+
+12. I confess, the program can't be considered as a good program at all. But I hope to build on my first programming course and first programming project, and improve in the future.
